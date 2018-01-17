@@ -1,0 +1,2 @@
+--require babel-core/register src/**/*.test.+(js|jsx)
+--require src/setupTests.js
