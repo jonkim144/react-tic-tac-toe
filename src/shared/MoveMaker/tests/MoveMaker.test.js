@@ -16,6 +16,12 @@ describe('MoveMaker', () => {
     moveMaker = new MoveMaker(pieces);
   });
 
+  describe('get boardSize()', () => {
+    it('total possible piece locations', () => {
+      expect(moveMaker.totalLocations).to.equal(pieces.length);
+    });
+  });
+
   describe('tryMakeMoveAt()', () => {
     it('does not modify input', () => {
       const expected = _.clone(pieces);
@@ -23,22 +29,22 @@ describe('MoveMaker', () => {
       expect(pieces).to.eql(expected);
     });
 
-    it('returns null location is already occupied', () => {
-      expect(moveMaker.tryMakeMoveAt(0)).to.eql([
+    it('returns null if location is already occupied', () => {
+      expect(moveMaker.tryMakeMoveAt(0).pieces).to.eql([
         PieceType.X, PieceType.Empty, PieceType.Empty,
         PieceType.Empty, PieceType.Empty, PieceType.Empty,
         PieceType.Empty, PieceType.Empty, PieceType.Empty,
       ]);
-      expect(moveMaker.tryMakeMoveAt(0)).to.eql(null);
+      expect(moveMaker.tryMakeMoveAt(0).pieces).to.eql(null);
     });
 
     it('switches side to move after placing piece', () => {
-      expect(moveMaker.tryMakeMoveAt(0)).to.eql([
+      expect(moveMaker.tryMakeMoveAt(0).pieces).to.eql([
         PieceType.X, PieceType.Empty, PieceType.Empty,
         PieceType.Empty, PieceType.Empty, PieceType.Empty,
         PieceType.Empty, PieceType.Empty, PieceType.Empty,
       ]);
-      expect(moveMaker.tryMakeMoveAt(1)).to.eql([
+      expect(moveMaker.tryMakeMoveAt(1).pieces).to.eql([
         PieceType.X, PieceType.O, PieceType.Empty,
         PieceType.Empty, PieceType.Empty, PieceType.Empty,
         PieceType.Empty, PieceType.Empty, PieceType.Empty,

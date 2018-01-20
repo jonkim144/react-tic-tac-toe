@@ -1,6 +1,6 @@
 import React from 'react';
 import { Board } from 'components';
-import { MoveMaker, PieceType } from 'shared';
+import { Engine, MoveMaker, PieceType } from 'shared';
 import { Button, Container, Header, Segment } from 'semantic-ui-react';
 
 export default class BoardContainer extends React.PureComponent {
@@ -19,13 +19,18 @@ export default class BoardContainer extends React.PureComponent {
       pieces.push(PieceType.Empty);
     }
     this.moveMaker = new MoveMaker(pieces);
+    this.engine = new Engine(this.moveMaker);
     this.setState({ pieces });
   };
 
   tryMakeMoveAt = (location) => {
-    const pieces = this.moveMaker.tryMakeMoveAt(location);
+    let { pieces } = this.moveMaker.tryMakeMoveAt(location);
     if (!pieces) return;
 
+    const response = this.engine.makeBestMove();
+    if (!response.pieces) return;
+
+    pieces = response.pieces;
     this.setState({ pieces });
   };
 
