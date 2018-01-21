@@ -1,75 +1,73 @@
-import _ from 'lodash';
+import { GameState, PieceType } from 'shared';
 
 export default class Engine {
   constructor(moveMaker) {
+    if (null == moveMaker) throw new Error("Argument 'moveMaker' cannot be null.");
+
     this.moveMaker = moveMaker;
-    this.ticTacToeLocationSetsByLocation = {};
-    const size = Math.sqrt(this.moveMaker.totalLocations);
-    // diagonal 1
-    this.initializeTicTacToeLocationSets(0, (i) => (i < this.moveMaker.totalLocations), size+1);
-    // diagonal 2
-    this.initializeTicTacToeLocationSets(size-1, (i) => (i === size-1 || i % size !== size-1), size-1);
-    // columns
-    for (let columnStart = 0; columnStart < size; ++columnStart)
-    {
-      this.initializeTicTacToeLocationSets(columnStart, (i) => (i < this.moveMaker.totalLocations), size);
-    }
-    // rows
-    for (let rowStart = 0; rowStart < this.moveMaker.totalLocations; rowStart += size)
-    {
-      this.initializeTicTacToeLocationSets(rowStart, (i) => (i === rowStart || (i % size !== 0)), 1);
-    }
   }
 
-  initializeTicTacToeLocationSets = (start, until, increment) => {
-    let ticTacToeLocations = [];
-    for (let i = start; until(i); i += increment)
+  dumpBoard = (pieces) => {
+    let rows = [];
+    const size = Math.sqrt(pieces.length);
+    for (let row = 0; row < size; ++row)
     {
-      if (!this.ticTacToeLocationSetsByLocation[i])
+      let columns = [];
+      for (let column = 0; column < size; ++column)
       {
-        this.ticTacToeLocationSetsByLocation[i] = [];
+         columns.push(pieces[row * size + column].toString());
       }
-      this.ticTacToeLocationSetsByLocation[i].push(ticTacToeLocations);
-      ticTacToeLocations.push(i);
+      rows.push(columns.join(","));
     }
+    return "\n" + rows.join("\n");
   };
 
-  makeBestMove = () => {
+  makeBestMove = (depth) => {
+    let negate = 1;
+    if (0 == depth)
+    {
+      // purposefully lose
+      depth = 8;
+      negate = -1;
+    }
     let bestMove = -1;
-    for (let i = 0; i < this.moveMaker.totalLocations; ++i) {
+    let bestScore = Number.MIN_SAFE_INTEGER;
+    for (let i = 0; i < this.moveMaker.totalLocations; ++i)
+    {
       const result = this.moveMaker.tryMakeMoveAt(i);
       if (!result.pieces) continue;
 
-      if (this.isTicTacToe(result.pieces, i))
+      const color = ((PieceType.O === result.pieces[i]) ? -1 : 1) * negate;
+      const score = -this.findBestMove(result, i, depth-1, -color);
+      if (score > bestScore)
       {
-        return result;
+        bestMove = i;
+        bestScore = score;
       }
-      bestMove = i;
       this.moveMaker.undoLastMove();
     }
     return this.moveMaker.tryMakeMoveAt(bestMove);
   };
 
-  isTicTacToe = (pieces, location) => {
-    const toMatch = pieces[location];
-    const locationSets = this.ticTacToeLocationSetsByLocation[location];
-    for (let i = 0; i < locationSets.length; ++i)
+  findBestMove = (lastResult, lastMove, depth, color) => {
+    if (lastResult.gameState === GameState.TIC_TAC_TOE)
     {
-      const locationSet = locationSets[i];
-      let matches = 0;
-      for (let j = 0; j < locationSet.length; ++j)
-      {
-        const location = locationSet[j];
-        if (pieces[location] === toMatch)
-        {
-          ++matches;
-        }
-      }
-      if (matches === locationSet.length)
-      {
-        return true;
-      }
+      return color * ((lastResult.pieces[lastMove] === PieceType.X) ? 9999 : -9999);
     }
-    return false;
+    if (depth === 0 || lastResult.gameState === GameState.DRAW)
+    {
+      return 0;
+    }
+    let bestScore = Number.MIN_SAFE_INTEGER;
+    for (let i = 0; i < this.moveMaker.totalLocations; ++i)
+    {
+      const result = this.moveMaker.tryMakeMoveAt(i);
+      if (!result.pieces) continue;
+
+      const score = -this.findBestMove(result, i, depth-1, -color);
+      this.moveMaker.undoLastMove();
+      bestScore = Math.max(score, bestScore);
+    }
+    return bestScore;
   };
 }

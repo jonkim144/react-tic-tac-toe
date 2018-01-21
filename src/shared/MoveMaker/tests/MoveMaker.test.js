@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import chai from 'chai';
 import { expect } from 'chai';
-import { MoveMaker, PieceType } from 'shared';
+import { MoveMaker, PieceType, TicTacToeFinder } from 'shared';
 
 describe('MoveMaker', () => {
   let moveMaker = undefined;
@@ -13,7 +13,7 @@ describe('MoveMaker', () => {
       PieceType.Empty, PieceType.Empty, PieceType.Empty,
       PieceType.Empty, PieceType.Empty, PieceType.Empty,
     ];
-    moveMaker = new MoveMaker(pieces);
+    moveMaker = new MoveMaker(pieces, new TicTacToeFinder(pieces.length));
   });
 
   describe('get boardSize()', () => {
