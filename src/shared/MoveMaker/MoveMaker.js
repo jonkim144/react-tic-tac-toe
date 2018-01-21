@@ -31,10 +31,11 @@ export default class MoveMaker {
   };
 
   undoLastMove = () => {
-    if (this.history.length === 0) return;
+    if (this.history.length === 0) return null;
 
     this.pieces[this.history.pop()] = PieceType.Empty;
     this.switchSides();
+    return { movesLeft: this.history.length, pieces: _.clone(this.pieces) };
   };
 
   switchSides = () => {

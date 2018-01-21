@@ -7,21 +7,6 @@ export default class Engine {
     this.moveMaker = moveMaker;
   }
 
-  dumpBoard = (pieces) => {
-    let rows = [];
-    const size = Math.sqrt(pieces.length);
-    for (let row = 0; row < size; ++row)
-    {
-      let columns = [];
-      for (let column = 0; column < size; ++column)
-      {
-         columns.push(pieces[row * size + column].toString());
-      }
-      rows.push(columns.join(","));
-    }
-    return "\n" + rows.join("\n");
-  };
-
   makeBestMove = (depth) => {
     let negate = 1;
     if (0 == depth)

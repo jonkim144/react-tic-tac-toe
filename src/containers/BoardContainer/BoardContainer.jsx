@@ -9,7 +9,7 @@ export default class BoardContainer extends React.PureComponent {
   constructor(props) {
     super(props);
     this.depth = DEFAULT_DEPTH;
-    this.state = { pieces: [], status: '' };
+    this.state = { pieces: [], status: '', movesMade: false, isEngineOn: true };
   }
 
   componentDidMount() {
@@ -25,49 +25,74 @@ export default class BoardContainer extends React.PureComponent {
     this.moveMaker = new MoveMaker(pieces, ticTacToeFinder);
     this.engine = new Engine(this.moveMaker, ticTacToeFinder);
     this.isGameOver = false;
-    this.setState({ pieces, status: '' });
+    this.setState({ pieces, status: '', movesMade: false, isEngineOn: true });
   };
 
   tryMakeMoveAt = (location) => {
     if (this.isGameOver) return;
 
+    const { sideToMove } = this.moveMaker;
     let { gameState, pieces } = this.moveMaker.tryMakeMoveAt(location);
     if (!pieces) return;
 
+    this.setState({ movesMade: true });
     if (GameState.NORMAL === gameState)
     {
-      pieces = this.makeComputerMove();
+      if (this.state.isEngineOn)
+      {
+        pieces = this.makeComputerMove();
+      }
     }
     else
     {
-      this.handleGameEnded(gameState, true);
+      this.handleGameEnded(gameState, sideToMove);
     }
     this.setState({ pieces });
   };
 
   makeComputerMove = () => {
+    const { sideToMove } = this.moveMaker;
     const { gameState, pieces } = this.engine.makeBestMove(this.depth);
     if (GameState.NORMAL !== gameState)
     {
-      this.handleGameEnded(gameState, false);
+      this.handleGameEnded(gameState, sideToMove);
     }
     return pieces;
   };
 
-  handleGameEnded = (gameState, wasUserLastToMove) => {
+  handleGameEnded = (gameState, lastSideToMove) => {
     if (GameState.DRAW === gameState)
     {
       this.setState({ status: "Draw!" })
     }
     else
     {
-      this.setState({ status: (wasUserLastToMove ? "You win!" : "Computer wins!") })
+      this.setState({ status: `${lastSideToMove.toString()} wins!` });
     }
     this.isGameOver = true;
   };
 
   handleChangeDifficulty = (event, data) => {
     this.depth = data.value;
+  };
+
+  handleClickUndo = () => {
+    if (this.isGameOver) return;
+
+    const response = this.moveMaker.undoLastMove();
+    if (!response) return;
+
+    this.setState({ movesMade: (response.movesLeft > 0), pieces: response.pieces });
+  };
+
+  handleClickToggleEngine = () => {
+    this.setState((prevState) => ({ isEngineOn: !prevState.isEngineOn }));
+  };
+
+  handleClickMakeAIMove = () => {
+    if (this.isGameOver) return;
+
+    this.setState({ pieces: this.makeComputerMove() });
   };
 
   render() {
@@ -92,6 +117,9 @@ export default class BoardContainer extends React.PureComponent {
         </Segment>
         <Segment basic>
           <Header>{this.state.status}</Header>
+          <Button disabled={!this.state.movesMade} onClick={this.handleClickUndo}>Undo</Button>
+          <Button onClick={this.handleClickToggleEngine}>Engine is {this.state.isEngineOn ? "on" : "off"}</Button>
+          <Button onClick={this.handleClickMakeAIMove} disabled={!this.state.isEngineOn}>Make AI move</Button>
         </Segment>
       </Container>
     );
