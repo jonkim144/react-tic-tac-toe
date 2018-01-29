@@ -11,8 +11,8 @@ export default class Engine {
     let negate = 1;
     if (0 == depth)
     {
-      // purposefully lose
-      depth = 8;
+      // purposely lose
+      depth = 2;
       negate = -1;
     }
     let bestMove = -1;

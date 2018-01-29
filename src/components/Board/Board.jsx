@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, Button } from 'semantic-ui-react';
+import { Button, Grid, Segment } from 'semantic-ui-react';
 import { Piece } from 'components';
 import { PieceType } from 'shared';
 

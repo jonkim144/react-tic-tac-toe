@@ -4,10 +4,8 @@ import { BoardContainer } from 'containers';
 
 const MOUNT_NODE = document.getElementById('root');
 
-const App = () => {
-  return (
-    <BoardContainer size={3} />
-  );
-};
+const App = () => (
+  <BoardContainer />
+);
 
 render(<App />, MOUNT_NODE);
