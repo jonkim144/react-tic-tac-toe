@@ -18,7 +18,7 @@ export default class Board extends React.PureComponent {
       for (let column = 0; column < size; ++column) {
         const location = row * size + column;
         const gridColumn =
-          <Grid.Column key={column}>
+          <Grid.Column key={column} style={{ minWidth: 70 }}>
             <Piece
               pieceType={this.props.pieces[location]}
               onClick={() => { this.props.onLocationClicked(location); }}
