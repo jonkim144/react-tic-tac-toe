@@ -51,7 +51,7 @@ export default class Engine {
 
       const score = -this.findBestMove(result, i, depth-1, -color);
       this.moveMaker.undoLastMove();
-      bestScore = Math.max(score, bestScore);
+      if (score > bestScore) bestScore = score;
     }
     return bestScore;
   };
